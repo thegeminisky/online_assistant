@@ -16,7 +16,6 @@ def connect_to_email(username, password, imap_url):
        return None
 
 
-
 def search_emails(mail, folder="inbox", criteria="UNSEEN"):
    mail.select(folder)
    status, messages = mail.search(None, criteria)

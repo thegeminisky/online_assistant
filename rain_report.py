@@ -7,13 +7,21 @@ import pytz
 
 def read_config(filename):
     config = {}
-    with open(filename, 'r') as f:
-        for line in f:
-            if '=' in line and not line.strip().startswith('#'):
-                key, value = line.split('=', 1)
-                config[key.strip()] = value.strip()
-    return config
+    # 尝试常见中文编码
+    for encoding in ['utf-8', 'gbk', 'gb18030']:
+        try:
+            with open(filename, 'r', encoding=encoding) as f:
+                for line in f:
+                    line = line.strip()
+                    if '=' in line and not line.startswith('#'):
+                        key, value = line.split('=', 1)
+                        config[key.strip()] = value.strip()
+            return config  # 成功读取则返回
+        except UnicodeDecodeError:
+            continue  # 尝试下一种编码
 
+    # 所有编码尝试失败
+    raise UnicodeDecodeError(f"无法解码文件 {filename}，请检查文件编码")
 
 def generate_jwt_token(file_path):
     # 使用with语句自动管理文件资源
