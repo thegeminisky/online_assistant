@@ -182,32 +182,32 @@ def check_single_location_rain(weather_data):
 
     return morning_rain, afternoon_rain
 
+if __name__ == '__main__':
+    # 读取配置数据
+    configlist = read_config('ignore_file\\key.txt')
+    hefeng_jwt_token = generate_jwt_token("ignore_file\\ed25519-private.pem")
 
-# 读取配置数据
-configlist = read_config('ignore_file\\key.txt')
-hefeng_jwt_token = generate_jwt_token("ignore_file\\ed25519-private.pem")
+    # 定义需要监测的坐标列表
+    location_list = configlist['location_list'].split('/')
 
-# 定义需要监测的坐标列表
-location_list = configlist['location_list'].split('/')
+    # 检查所有坐标点的降雨情况
+    morning_rain, afternoon_rain = check_rain_for_locations(location_list)
 
-# 检查所有坐标点的降雨情况
-morning_rain, afternoon_rain = check_rain_for_locations(location_list)
+    # 设置北京时区
+    beijing_tz = pytz.timezone('Asia/Shanghai')
 
-# 设置北京时区
-beijing_tz = pytz.timezone('Asia/Shanghai')
+    # 获取当前北京时间的日期和时间
+    now_beijing = datetime.now(beijing_tz)
+    current_time = now_beijing.time()
 
-# 获取当前北京时间的日期和时间
-now_beijing = datetime.now(beijing_tz)
-current_time = now_beijing.time()
+    # 定义时间范围
+    start_time_morning = time(6, 0, 0)
+    end_time_morning = time(9, 0, 0)
+    start_time_afternoon = time(12, 0, 0)
+    end_time_afternoon = time(15, 0, 0)
 
-# 定义时间范围
-start_time_morning = time(6, 0, 0)
-end_time_morning = time(9, 0, 0)
-start_time_afternoon = time(12, 0, 0)
-end_time_afternoon = time(15, 0, 0)
-
-# 检查时间并完成推送
-if start_time_morning <= current_time < end_time_morning and morning_rain:
-    dingtalk_push(msg='上午可能有雨')
-elif start_time_afternoon <= current_time < end_time_afternoon and afternoon_rain:
-    dingtalk_push(msg='下午可能有雨')
+    # 检查时间并完成推送
+    if start_time_morning <= current_time < end_time_morning and morning_rain:
+        dingtalk_push(msg='上午可能有雨')
+    elif start_time_afternoon <= current_time < end_time_afternoon and afternoon_rain:
+        dingtalk_push(msg='下午可能有雨')

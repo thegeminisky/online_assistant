@@ -1,4 +1,3 @@
-# !/usr/bin/env python
 
 import argparse
 import logging
@@ -52,8 +51,6 @@ def define_options():
 def send_custom_robot_group_message(msg, at_user_ids=None, at_mobiles=None, is_at_all=False):
     """
     发送钉钉自定义机器人群消息
-    :param access_token: 机器人webhook的access_token
-    :param secret: 机器人安全设置的加签secret
     :param msg: 消息内容
     :param at_user_ids: @的用户ID列表
     :param at_mobiles: @的手机号列表
@@ -61,14 +58,14 @@ def send_custom_robot_group_message(msg, at_user_ids=None, at_mobiles=None, is_a
     :return: 钉钉API响应
     """
     config = read_config('key.txt')
-    access_token = config['access_token']
-    secret = config['secret']
+    dingtalk_access_token = config['dingtalk_access_token']
+    dingtalk_secret = config['dingtalk_secret']
     timestamp = str(round(time.time() * 1000))
-    string_to_sign = f'{timestamp}\n{secret}'
-    hmac_code = hmac.new(secret.encode('utf-8'), string_to_sign.encode('utf-8'), digestmod=hashlib.sha256).digest()
+    string_to_sign = f'{timestamp}\n{dingtalk_secret}'
+    hmac_code = hmac.new(dingtalk_secret.encode('utf-8'), string_to_sign.encode('utf-8'), digestmod=hashlib.sha256).digest()
     sign = urllib.parse.quote_plus(base64.b64encode(hmac_code))
 
-    url = f'https://oapi.dingtalk.com/robot/send?access_token={access_token}&timestamp={timestamp}&sign={sign}'
+    url = f'https://oapi.dingtalk.com/robot/send?access_token={dingtalk_access_token}&timestamp={timestamp}&sign={sign}'
 
     body = {
         "at": {
