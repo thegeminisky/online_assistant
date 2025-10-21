@@ -1,24 +1,11 @@
-
-from services.dingtalk_notify import dingtalk_notify
-from services.rain_report import rain_report
-from auth_service.secrets_manager import SecretsManager
+from function_plugin import dingtalk_notify, email_monitor, rain_report
+from auth_service import SecretsManager
 import threading
 import time
-
+import traceback
 
 def run_service(service_instance, method_name, *args):
-    """安全运行服务方法。
-
-    此函数封装服务方法的执行，提供错误处理和性能监控。
-
-    Args:
-        service_instance: 服务类的实例。
-        method_name: 要调用的方法名称。
-        *args: 传递给方法的参数。
-
-    Returns:
-        bool: 如果执行成功返回True，否则返回False。
-    """
+    """安全运行服务方法。"""
     method = getattr(service_instance, method_name)
     try:
         start_time = time.time()
@@ -28,28 +15,24 @@ def run_service(service_instance, method_name, *args):
         return True
     except Exception as e:
         print(f"服务执行失败: {str(e)}")
+        print("完整堆栈跟踪:")
+        traceback.print_exc()
         return False
 
 
-if __name__ == "__main__":
-    """主程序入口。
+def run_single_service(service_instance, method_name, *args):
+    print(f"正在启动服务: {method_name}")
+    run_service(service_instance, method_name, *args)
+    print(f"服务 {method_name} 执行完毕")
 
-    初始化密钥管理器，创建服务实例，并并行执行多个服务任务。
-    """
-    # 预加载密钥并显示（调试用）
-    SecretsManager.load_secrets()
-    print("= 加载的密钥 =")
-    print(SecretsManager.list_secrets())
-    print("=")
 
-    # 创建服务实例
-    dingtalk_notify = dingtalk_notify()
-    rain_report = rain_report()
+def run_all_services():
 
-    # 服务任务列表
+    # 任务列表
     tasks = [
-        (dingtalk_notify, "push_notification_with_args", ["测试消息"]),
-        (rain_report, "rain_or_not", ['占位'])
+        (dingtalk_notify_service, "push_notification_with_args", ["测试消息"]),
+        (email_monitor_service, "email_service", ['占位']),
+        (rain_report_service, "rain_or_not", ['占位'])
     ]
 
     # 启动服务线程
@@ -62,11 +45,27 @@ if __name__ == "__main__":
         )
         t.start()
         threads.append(t)
-        time.sleep(0.1)  # 错开启动时间
+        time.sleep(0.1)
 
-    # 等待所有服务完成
     for t in threads:
         t.join()
 
     print("所有服务执行完毕")
+
+if __name__ == "__main__":
+    SecretsManager.load_secrets()
+    print("============= 加载的密钥 =============")
+    print(SecretsManager.list_secrets())
+    print("====================================")
+
+    # 创建服务实例
+    dingtalk_notify_service = dingtalk_notify()
+    rain_report_service = rain_report()
+    email_monitor_service = email_monitor()
+
+    # 启动服务
+    run_all_services()
+    #run_single_service(email_monitor_service, "email_service", '占位')
+
+
 

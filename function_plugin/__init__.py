@@ -1,5 +1,5 @@
 """
-services 包
+function_plugin 包
 
 该包提供三个主要功能模块：
 - dingtalk_notify: 钉钉机器人通知模块
@@ -9,9 +9,12 @@ services 包
 
 from .dingtalk_notify import dingtalk_notify
 
+from .email_monitor import email_monitor
+
 from .rain_report import rain_report
 
 __all__ = [
     "dingtalk_notify",
+    "email_monitor",
     "rain_report",
 ]

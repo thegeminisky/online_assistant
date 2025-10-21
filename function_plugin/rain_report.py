@@ -182,7 +182,6 @@ class rain_report:
 
     @require_secret("rain_report", "location_list")
     def location_list(self, secret=None):
-        print(secret.split('/'))
         return secret.split('/')
 
 
